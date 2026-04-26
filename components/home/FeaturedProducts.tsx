@@ -1,0 +1,113 @@
+﻿"use client";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { CAKE_PRODUCTS } from "@/lib/mockData";
+
+// Cada tarjeta entra desde un ángulo diferente para máximo impacto visual
+const CARD_INITIAL = [
+  { x: -70, y: 40, rotate: -2 },  // Ganache: desde la izquierda
+  { x: 0,   y: 80, rotate:  0 },  // Fondant: desde abajo (centro)
+  { x: 70,  y: 40, rotate:  2 },  // Tallada: desde la derecha
+];
+
+export default function FeaturedProducts() {
+  return (
+    <section className="py-28 px-6 bg-cream">
+      <div className="max-w-7xl mx-auto">
+        {/* Heading con clip-path reveal */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+          <div className="overflow-hidden">
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.75, ease: [0.32, 0.72, 0, 1] }}
+            >
+              <p className="text-teal text-xs uppercase tracking-widest font-body mb-3">
+                Nuestros productos
+              </p>
+              <h2 className="font-display text-4xl md:text-5xl font-semibold text-ink tracking-tight">
+                Cada cookie, única
+              </h2>
+            </motion.div>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
+          >
+            <Link
+              href="/productos"
+              className="text-sm text-ink-muted hover:text-teal transition-colors font-body underline underline-offset-4 self-start md:self-auto"
+            >
+              Ver todas las opciones →
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Grid de 3 columnas — proporción uniforme */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {CAKE_PRODUCTS.map((product, i) => (
+            <motion.div
+              key={product.id}
+              initial={{
+                x: CARD_INITIAL[i].x,
+                y: CARD_INITIAL[i].y,
+                opacity: 0,
+                scale: 0.92,
+                rotate: CARD_INITIAL[i].rotate
+              }}
+              whileInView={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{
+                type: "spring",
+                stiffness: 90,
+                damping: 18,
+                delay: i * 0.1
+              }}
+            >
+              <Link href={`/productos/${product.slug}`} className="group block">
+                <div className="relative overflow-hidden rounded-2xl aspect-[4/5] mb-4">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 group-hover:opacity-0"
+                  />
+                  <img
+                    src={product.hoverImageUrl}
+                    alt={`${product.name} — detalle`}
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 scale-105"
+                  />
+                  <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/15 transition-all duration-500" />
+                  {/* Badge de categoría */}
+                  <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="bg-white/90 backdrop-blur-sm text-ink text-[10px] font-body font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                      {product.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-display text-xl font-semibold text-ink mb-1 group-hover:text-teal transition-colors duration-300">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-ink-muted font-body">
+                      {product.shortDescription}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-ink-muted font-body">Desde</p>
+                    <p className="font-display text-lg font-semibold text-teal">
+                      ${product.sizes[0].price.toLocaleString("es-AR")}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
