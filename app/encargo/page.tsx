@@ -38,7 +38,7 @@ export default function EncargoPage() {
                 Hacé tu encargo
               </p>
               <h1 className="font-display text-4xl font-semibold text-ink">
-                Arts & Cakes
+                Elia Pasteleria
               </h1>
             </div>
             <StepIndicator current={step} />
