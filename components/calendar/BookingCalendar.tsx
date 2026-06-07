@@ -1,24 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCalendarStore } from "@/lib/store";
 import {
   getDaysInMonth,
   getFirstDayOfMonth,
   toISODate,
-  isPastDate,
-  isTooSoon,
+  isStrictlyPast,
+  meetsLeadTime,
   isTooFar,
   DAY_NAMES_ES,
 } from "@/lib/calendarUtils";
+import { getSpecialDatesMap } from "@/lib/data/specialDates";
 import CalendarHeader from "./CalendarHeader";
 import CalendarCell from "./CalendarCell";
 
 interface Props {
   adminMode?: boolean;
   onDateSelect?: (dateStr: string) => void;
+  /** Anticipación mínima requerida por el producto elegido (horas). */
+  minLeadHours?: number;
 }
 
-export default function BookingCalendar({ adminMode = false, onDateSelect }: Props) {
+export default function BookingCalendar({
+  adminMode = false,
+  onDateSelect,
+  minLeadHours = 0,
+}: Props) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -31,6 +38,8 @@ export default function BookingCalendar({ adminMode = false, onDateSelect }: Pro
     blockDate,
     unblockDate,
   } = useCalendarStore();
+
+  const specialMap = useMemo(() => getSpecialDatesMap(), []);
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
@@ -73,12 +82,16 @@ export default function BookingCalendar({ adminMode = false, onDateSelect }: Pro
 
       {/* Legend */}
       {!adminMode && (
-        <div className="flex gap-4 mb-5 text-xs text-ink-muted font-body">
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-5 text-xs text-ink-muted font-body">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-sage/60" /> Disponible
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Ocupado
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#6CA7D4" }} />
+            Fecha especial
           </span>
         </div>
       )}
@@ -104,9 +117,10 @@ export default function BookingCalendar({ adminMode = false, onDateSelect }: Pro
           const dateStr = toISODate(year, month, day);
           const blocked = isBlocked(dateStr);
           const reason = getBlockReason(dateStr);
-          const past = isPastDate(dateStr);
-          const tooSoon = isTooSoon(dateStr, 1);
+          const past = isStrictlyPast(dateStr);
+          const tooSoon = !adminMode && !meetsLeadTime(dateStr, minLeadHours);
           const tooFar = isTooFar(dateStr, 60);
+          const special = specialMap[dateStr];
           return (
             <CalendarCell
               key={dateStr}
@@ -121,6 +135,9 @@ export default function BookingCalendar({ adminMode = false, onDateSelect }: Pro
               isToday={dateStr === todayStr}
               onClick={handleCellClick}
               adminMode={adminMode}
+              isSpecial={!!special}
+              specialColor={special?.color}
+              specialTitle={special ? `${special.title} — ${special.includes}` : undefined}
             />
           );
         })}

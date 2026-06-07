@@ -1,44 +1,44 @@
-import { CAKE_PRODUCTS, ADDON_PRODUCTS } from "./mockData";
+import { SITE } from "./siteConfig";
 import { formatDateES } from "./calendarUtils";
+import { formatARS } from "./pricing";
+import type { Order } from "./orderTypes";
 
-const WA_NUMBER = "5491100000000";
-
-interface OrderDetails {
-  selectedDate: string;
-  selectedCategoryId: string;
-  selectedSizeKey: string;
-  selectedAddons: Record<string, number>;
-  customerName: string;
-  customerPhone: string;
-  customerNeighborhood: string;
-  customerMessage: string;
+/** Link de WhatsApp genérico (opcionalmente con mensaje pre-cargado). */
+export function whatsappLink(text?: string): string {
+  const base = `https://wa.me/${SITE.whatsappNumber}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
 
-export function buildWhatsAppURL(order: OrderDetails): string {
-  const product = CAKE_PRODUCTS.find((p) => p.id === order.selectedCategoryId);
-  const size = product?.sizes.find((s) => s.key === order.selectedSizeKey);
+/** Link de WhatsApp con el detalle completo de un pedido. */
+export function buildWhatsAppURL(order: Order): string {
+  const lines: string[] = ["¡Hola! Quiero hacer un encargo:", ""];
 
-  const addonLines = Object.entries(order.selectedAddons)
-    .map(([id, qty]) => {
-      const addon = ADDON_PRODUCTS.find((a) => a.id === id);
-      return addon ? `• ${addon.name}: ${qty} ${addon.unitLabel}` : "";
-    })
-    .filter(Boolean)
-    .join("\n");
+  if (order.deliveryDate) {
+    lines.push(`📅 Fecha de entrega: ${formatDateES(order.deliveryDate)}`, "");
+  }
 
-  const message = [
-    `¡Hola! Quiero hacer un encargo:`,
-    ``,
-    `📅 Fecha de entrega: ${formatDateES(order.selectedDate)}`,
-    `🎂 Torta: ${product?.name ?? "—"} — ${size?.portions ?? "—"} (${size?.label ?? "—"})`,
-    addonLines ? `🍪 Mesa dulce:\n${addonLines}` : "",
-    ``,
-    `👤 Nombre: ${order.customerName}`,
-    `📍 Barrio: ${order.customerNeighborhood}`,
-    order.customerMessage ? `💬 Descripción del diseño: ${order.customerMessage}` : "",
-  ]
-    .filter((line) => line !== undefined && line !== "")
-    .join("\n");
+  lines.push("🧾 Pedido:");
+  for (const item of order.items) {
+    lines.push(`• ${item.productName} — ${item.detail} (${formatARS(item.lineTotal)})`);
+    if (item.fillingName) lines.push(`   Relleno: ${item.fillingName}`);
+    if (item.decorationName) lines.push(`   Decoración: ${item.decorationName}`);
+  }
 
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
+  lines.push("", `💰 Total estimado: ${formatARS(order.total)}`);
+  if (order.requiresDeposit) {
+    lines.push(`🔖 Seña (50%): ${formatARS(order.depositAmount)} — el pedido se confirma con la seña.`);
+  }
+
+  lines.push(
+    "",
+    `🚚 Entrega: ${order.deliveryMethod === "shipping" ? "Envío a domicilio" : "Retiro en el local"}`
+  );
+  if (order.deliveryMethod === "shipping" && order.shippingAddress) {
+    lines.push(`   Dirección: ${order.shippingAddress}`);
+  }
+
+  lines.push("", `👤 Nombre: ${order.customerName}`, `📍 Barrio: ${order.customerNeighborhood}`);
+  if (order.customerMessage) lines.push(`💬 Detalles: ${order.customerMessage}`);
+
+  return whatsappLink(lines.join("\n"));
 }

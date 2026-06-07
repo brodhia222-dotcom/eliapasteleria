@@ -1,14 +1,17 @@
-﻿"use client";
+"use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { CAKE_PRODUCTS } from "@/lib/mockData";
+import { getFeaturedProducts } from "@/lib/data/products";
+import { priceFrom, formatARS } from "@/lib/pricing";
 
 // Cada tarjeta entra desde un ángulo diferente para máximo impacto visual
 const CARD_INITIAL = [
-  { x: -70, y: 40, rotate: -2 },  // Ganache: desde la izquierda
-  { x: 0,   y: 80, rotate:  0 },  // Fondant: desde abajo (centro)
-  { x: 70,  y: 40, rotate:  2 },  // Tallada: desde la derecha
+  { x: -70, y: 40, rotate: -2 },
+  { x: 0, y: 80, rotate: 0 },
+  { x: 70, y: 40, rotate: 2 },
 ];
+
+const FEATURED = getFeaturedProducts();
 
 export default function FeaturedProducts() {
   return (
@@ -27,7 +30,7 @@ export default function FeaturedProducts() {
                 Nuestros productos
               </p>
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-ink tracking-tight">
-                Cada cookie, única
+                Para cada antojo
               </h2>
             </motion.div>
           </div>
@@ -41,14 +44,14 @@ export default function FeaturedProducts() {
               href="/productos"
               className="text-sm text-ink-muted hover:text-teal transition-colors font-body underline underline-offset-4 self-start md:self-auto"
             >
-              Ver todas las opciones →
+              Ver todo el catálogo →
             </Link>
           </motion.div>
         </div>
 
         {/* Grid de 3 columnas — proporción uniforme */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {CAKE_PRODUCTS.map((product, i) => (
+          {FEATURED.map((product, i) => (
             <motion.div
               key={product.id}
               initial={{
@@ -56,16 +59,11 @@ export default function FeaturedProducts() {
                 y: CARD_INITIAL[i].y,
                 opacity: 0,
                 scale: 0.92,
-                rotate: CARD_INITIAL[i].rotate
+                rotate: CARD_INITIAL[i].rotate,
               }}
               whileInView={{ x: 0, y: 0, opacity: 1, scale: 1, rotate: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{
-                type: "spring",
-                stiffness: 90,
-                damping: 18,
-                delay: i * 0.1
-              }}
+              transition={{ type: "spring", stiffness: 90, damping: 18, delay: i * 0.1 }}
             >
               <Link href={`/productos/${product.slug}`} className="group block">
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/5] mb-4">
@@ -80,12 +78,13 @@ export default function FeaturedProducts() {
                     className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 scale-105"
                   />
                   <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/15 transition-all duration-500" />
-                  {/* Badge de categoría */}
-                  <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="bg-white/90 backdrop-blur-sm text-ink text-[10px] font-body font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full">
-                      {product.category}
-                    </span>
-                  </div>
+                  {product.leadTime.type === "stock" && (
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-sage text-white text-[10px] font-body font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                        Siempre disponible
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -99,7 +98,7 @@ export default function FeaturedProducts() {
                   <div className="text-right shrink-0">
                     <p className="text-xs text-ink-muted font-body">Desde</p>
                     <p className="font-display text-lg font-semibold text-teal">
-                      ${product.sizes[0].price.toLocaleString("es-AR")}
+                      {formatARS(priceFrom(product))}
                     </p>
                   </div>
                 </div>

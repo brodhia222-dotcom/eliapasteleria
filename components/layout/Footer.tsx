@@ -1,49 +1,62 @@
 import Link from "next/link";
+import { SITE } from "@/lib/siteConfig";
+import { whatsappLink } from "@/lib/whatsappUtils";
+import MapEmbed from "@/components/layout/MapEmbed";
 
 export default function Footer() {
   return (
     <footer className="bg-ink text-cream/70 pt-12 pb-8 px-6 mt-auto">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8 pb-8 border-b border-cream/10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-cream/10">
           <div>
             <p className="font-display text-2xl font-semibold text-cream mb-2">
-              Elia Pastelería
+              {SITE.brand}
             </p>
             <p className="text-sm text-cream/50 max-w-xs">
-              Cookies decoradas y porciones de torta artesanales elaboradas con amor en Buenos Aires.
+              Cookies y brownies siempre disponibles, tortas y mesa dulce artesanal
+              elaboradas con amor en Buenos Aires.
             </p>
           </div>
 
-          <nav className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
+          <nav className="flex flex-col gap-2 text-sm">
+            <p className="text-cream/40 text-xs uppercase tracking-widest mb-1">Menú</p>
             <Link href="/productos" className="hover:text-cream transition-colors">Productos</Link>
+            <Link href="/tortas" className="hover:text-cream transition-colors">Tortas</Link>
+            <Link href="/mesa-dulce" className="hover:text-cream transition-colors">Mesa dulce</Link>
             <Link href="/galeria" className="hover:text-cream transition-colors">Galería</Link>
-            <Link href="/nosotras" className="hover:text-cream transition-colors">Sobre mí</Link>
-            <Link href="/preguntas" className="hover:text-cream transition-colors">Preguntas</Link>
             <Link href="/encargo" className="hover:text-cream transition-colors">Hacer encargo</Link>
           </nav>
 
-          <div className="flex flex-col gap-3 text-sm">
+          <div className="flex flex-col gap-2 text-sm">
+            <p className="text-cream/40 text-xs uppercase tracking-widest mb-1">Contacto</p>
             <a
-              href="https://wa.me/5491100000000"
+              href={whatsappLink()}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-cream transition-colors"
             >
-              WhatsApp
+              WhatsApp {SITE.whatsappDisplay}
             </a>
             <a
-              href="https://instagram.com/eliapasteleria"
+              href={`https://instagram.com/${SITE.instagram}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-cream transition-colors"
             >
-              @eliapasteleria
+              @{SITE.instagram}
             </a>
+            <p className="text-cream/50">{SITE.address}</p>
+            <p className="text-cream/50">{SITE.hours}</p>
+          </div>
+
+          <div>
+            <p className="text-cream/40 text-xs uppercase tracking-widest mb-2">Ubicación</p>
+            <MapEmbed heightClass="h-36" />
           </div>
         </div>
 
         <div className="pt-6 flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-cream/30">
-          <p>© {new Date().getFullYear()} Elia Pastelería. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} {SITE.brand}. Todos los derechos reservados.</p>
           <p className="font-accent italic">Hecho con amor en Argentina</p>
         </div>
       </div>

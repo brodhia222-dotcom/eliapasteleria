@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FAQ_ITEMS } from "@/lib/mockData";
-import Link from "next/link";
+import { whatsappLink } from "@/lib/whatsappUtils";
 
 export default function PreguntasPage() {
   const [open, setOpen] = useState<string | null>(null);
@@ -68,7 +68,7 @@ export default function PreguntasPage() {
             ¿No encontrás lo que buscás?
           </p>
           <a
-            href="https://wa.me/5491100000000"
+            href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-teal text-white font-medium px-6 py-3 rounded-full text-sm hover:bg-teal-d transition-colors"

@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { SITE } from "@/lib/siteConfig";
+import { whatsappLink } from "@/lib/whatsappUtils";
+import MapEmbed from "@/components/layout/MapEmbed";
 
 export default function NosotrasPage() {
   return (
@@ -56,7 +59,7 @@ export default function NosotrasPage() {
                 Hacer un encargo →
               </Link>
               <a
-                href="https://wa.me/5491100000000"
+                href={whatsappLink()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 border border-black/10 text-ink font-medium px-7 py-3.5 rounded-full hover:border-ink transition-colors text-sm"
@@ -65,6 +68,22 @@ export default function NosotrasPage() {
               </a>
             </div>
           </div>
+        </div>
+
+        {/* Ubicación */}
+        <div className="mt-20">
+          <p className="text-teal text-xs uppercase tracking-widest font-body mb-3">
+            Dónde estamos
+          </p>
+          <h2 className="font-display text-3xl font-semibold text-ink tracking-tight mb-2">
+            Ubicación y retiro
+          </h2>
+          <p className="font-body text-ink-muted text-sm mb-6 max-w-lg">
+            Podés retirar tu pedido por el local o coordinar un envío a domicilio.
+            {" "}
+            {SITE.address} · {SITE.hours}.
+          </p>
+          <MapEmbed heightClass="h-80" />
         </div>
       </div>
     </div>

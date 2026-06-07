@@ -34,6 +34,25 @@ export function isTooFar(dateStr: string, maxDaysAhead = 60): boolean {
   return diff > maxDaysAhead;
 }
 
+/** Fecha estrictamente anterior a hoy (hoy NO cuenta como pasado). */
+export function isStrictlyPast(dateStr: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const date = new Date(dateStr + "T00:00:00");
+  return date < today;
+}
+
+/**
+ * ¿La fecha cumple la anticipación requerida por el producto?
+ * `leadHours = 0` (stock 24/7) permite desde hoy; 48 ≈ 2 días; 120 ≈ 5 días.
+ */
+export function meetsLeadTime(dateStr: string, leadHours: number): boolean {
+  const earliest = new Date(Date.now() + leadHours * 60 * 60 * 1000);
+  earliest.setHours(0, 0, 0, 0);
+  const date = new Date(dateStr + "T00:00:00");
+  return date >= earliest;
+}
+
 export const MONTH_NAMES_ES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",

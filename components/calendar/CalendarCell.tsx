@@ -1,4 +1,4 @@
-﻿import { DateBlockReason } from "@/lib/store";
+import { DateBlockReason } from "@/lib/store";
 
 interface Props {
   day: number;
@@ -12,6 +12,9 @@ interface Props {
   isToday: boolean;
   onClick: (dateStr: string) => void;
   adminMode?: boolean;
+  isSpecial?: boolean;
+  specialColor?: string;
+  specialTitle?: string;
 }
 
 export default function CalendarCell({
@@ -26,8 +29,12 @@ export default function CalendarCell({
   isToday,
   onClick,
   adminMode = false,
+  isSpecial = false,
+  specialColor,
+  specialTitle,
 }: Props) {
   const isUnavailable = !adminMode && (isPast || isTooSoon || isTooFar || isBlocked);
+  const selectable = !isUnavailable || adminMode;
 
   const baseClasses =
     "relative w-10 h-10 mx-auto flex items-center justify-center rounded-full text-sm font-body font-medium transition-all duration-200 select-none";
@@ -53,25 +60,39 @@ export default function CalendarCell({
     dotColor = "bg-sage/60";
   }
 
+  // Resaltado de fecha especial: anillo + dot del color de la fecha (si la
+  // celda no está seleccionada). Aplica también en admin para que se vea.
+  const showSpecial = isSpecial && !isSelected && (selectable || adminMode);
+
+  const title = isSpecial
+    ? specialTitle
+    : isBlocked
+    ? blockReason === "admin"
+      ? "Fecha ocupada"
+      : "Pedido confirmado"
+    : undefined;
+
   return (
     <div className="flex flex-col items-center gap-1 py-1">
       <button
-        onClick={() => !isUnavailable && onClick(dateStr)}
+        onClick={() => selectable && onClick(dateStr)}
         disabled={isUnavailable && !adminMode}
         className={`${baseClasses} ${stateClasses}`}
-        aria-label={`${day} ${isBlocked ? "— no disponible" : ""}`}
-        title={
-          isBlocked
-            ? blockReason === "admin"
-              ? "Fecha ocupada"
-              : "Pedido confirmado"
-            : undefined
-        }
+        style={showSpecial ? { boxShadow: `inset 0 0 0 1.5px ${specialColor}` } : undefined}
+        aria-label={`${day}${isSpecial ? ` — ${specialTitle ?? "fecha especial"}` : ""}${
+          isBlocked ? " — no disponible" : ""
+        }`}
+        title={title}
       >
         {day}
       </button>
-      {dotColor && !isSelected && (
-        <span className={`w-1 h-1 rounded-full ${dotColor}`} />
+      {showSpecial ? (
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ backgroundColor: specialColor }}
+        />
+      ) : (
+        dotColor && !isSelected && <span className={`w-1 h-1 rounded-full ${dotColor}`} />
       )}
     </div>
   );
