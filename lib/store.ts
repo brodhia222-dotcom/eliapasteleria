@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getInitialBlockedDates } from "./data/calendar";
-import { getInitialAvailability, availabilityKey } from "./data/stock";
+import { getInitialAvailability } from "./data/stock";
 import type { DeliveryMethod } from "./orderTypes";
 
 export type DateBlockReason = "admin" | "order";
@@ -48,35 +48,28 @@ export const useCalendarStore = create<CalendarStore>()(
 // ============================================================================
 interface StockStore {
   availability: Record<string, boolean>;
-  isAvailable: (productId: string, varietyId?: string | null) => boolean;
-  setAvailable: (productId: string, varietyId: string | null, value: boolean) => void;
-  toggle: (productId: string, varietyId?: string | null) => void;
+  isAvailable: (itemId: string) => boolean;
+  setAvailable: (itemId: string, value: boolean) => void;
+  toggle: (itemId: string) => void;
 }
 
 export const useStockStore = create<StockStore>()(
   persist(
     (set, get) => ({
       availability: getInitialAvailability(),
-      isAvailable: (productId, varietyId) => {
-        const key = availabilityKey(productId, varietyId);
-        const v = get().availability[key];
+      isAvailable: (itemId) => {
+        const v = get().availability[itemId];
         return v === undefined ? true : v;
       },
-      setAvailable: (productId, varietyId, value) =>
-        set((state) => ({
-          availability: {
-            ...state.availability,
-            [availabilityKey(productId, varietyId)]: value,
-          },
-        })),
-      toggle: (productId, varietyId) =>
+      setAvailable: (itemId, value) =>
+        set((state) => ({ availability: { ...state.availability, [itemId]: value } })),
+      toggle: (itemId) =>
         set((state) => {
-          const key = availabilityKey(productId, varietyId ?? null);
-          const current = state.availability[key];
+          const current = state.availability[itemId];
           return {
             availability: {
               ...state.availability,
-              [key]: current === undefined ? false : !current,
+              [itemId]: current === undefined ? false : !current,
             },
           };
         }),
@@ -86,36 +79,16 @@ export const useStockStore = create<StockStore>()(
 );
 
 // ============================================================================
-// PEDIDO (estado del formulario multi-step)
+// DATOS DEL CLIENTE Y ENTREGA (el carrito vive en cartStore)
 // ============================================================================
 interface OrderStore {
-  // selección del producto principal
-  selectedProductId: string | null;
-  selectedSizeKey: string | null; // standard
-  selectedTierKey: string | null; // custom
-  selectedFillingId: string | null; // custom
-  selectedDecorationId: string | null; // custom
-  selectedVarietyId: string | null; // stock (cookies)
-  qty: number; // cantidad (docenas para stock; 1 para tortas)
-  selectedAddons: Record<string, number>;
-  // entrega
   deliveryMethod: DeliveryMethod;
   shippingAddress: string;
   shippingDisclaimerAccepted: boolean;
-  // contacto
   customerName: string;
   customerPhone: string;
   customerNeighborhood: string;
   customerMessage: string;
-  // setters
-  setProduct: (id: string) => void;
-  setSize: (key: string) => void;
-  setTier: (key: string) => void;
-  setFilling: (id: string) => void;
-  setDecoration: (id: string) => void;
-  setVariety: (id: string) => void;
-  setQty: (n: number) => void;
-  setAddon: (id: string, qty: number) => void;
   setDelivery: (method: DeliveryMethod) => void;
   setShippingAddress: (value: string) => void;
   setDisclaimer: (value: boolean) => void;
@@ -124,14 +97,6 @@ interface OrderStore {
 }
 
 const INITIAL_ORDER = {
-  selectedProductId: null,
-  selectedSizeKey: null,
-  selectedTierKey: null,
-  selectedFillingId: null,
-  selectedDecorationId: null,
-  selectedVarietyId: null,
-  qty: 1,
-  selectedAddons: {} as Record<string, number>,
   deliveryMethod: "pickup" as DeliveryMethod,
   shippingAddress: "",
   shippingDisclaimerAccepted: false,
@@ -143,31 +108,6 @@ const INITIAL_ORDER = {
 
 export const useOrderStore = create<OrderStore>()((set) => ({
   ...INITIAL_ORDER,
-  setProduct: (id) =>
-    set({
-      selectedProductId: id,
-      selectedSizeKey: null,
-      selectedTierKey: null,
-      selectedFillingId: null,
-      selectedDecorationId: null,
-      selectedVarietyId: null,
-      qty: 1,
-    }),
-  setSize: (key) => set({ selectedSizeKey: key }),
-  setTier: (key) => set({ selectedTierKey: key }),
-  setFilling: (id) => set({ selectedFillingId: id }),
-  setDecoration: (id) => set({ selectedDecorationId: id }),
-  setVariety: (id) => set({ selectedVarietyId: id }),
-  setQty: (n) => set({ qty: Math.max(1, n) }),
-  setAddon: (id, qty) =>
-    set((state) => ({
-      selectedAddons:
-        qty === 0
-          ? Object.fromEntries(
-              Object.entries(state.selectedAddons).filter(([k]) => k !== id)
-            )
-          : { ...state.selectedAddons, [id]: qty },
-    })),
   setDelivery: (method) => set({ deliveryMethod: method }),
   setShippingAddress: (value) => set({ shippingAddress: value }),
   setDisclaimer: (value) => set({ shippingDisclaimerAccepted: value }),

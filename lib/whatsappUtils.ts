@@ -11,7 +11,7 @@ export function whatsappLink(text?: string): string {
 
 /** Link de WhatsApp con el detalle completo de un pedido. */
 export function buildWhatsAppURL(order: Order): string {
-  const lines: string[] = ["¡Hola! Quiero hacer un encargo:", ""];
+  const lines: string[] = ["¡Hola! Quiero hacer un pedido:", ""];
 
   if (order.deliveryDate) {
     lines.push(`📅 Fecha de entrega: ${formatDateES(order.deliveryDate)}`, "");
@@ -19,9 +19,8 @@ export function buildWhatsAppURL(order: Order): string {
 
   lines.push("🧾 Pedido:");
   for (const item of order.items) {
-    lines.push(`• ${item.productName} — ${item.detail} (${formatARS(item.lineTotal)})`);
-    if (item.fillingName) lines.push(`   Relleno: ${item.fillingName}`);
-    if (item.decorationName) lines.push(`   Decoración: ${item.decorationName}`);
+    const qtyLabel = item.qty > 1 ? `${item.qty}× ` : "";
+    lines.push(`• ${qtyLabel}${item.name} — ${item.detail} (${formatARS(item.lineTotal)})`);
   }
 
   lines.push("", `💰 Total estimado: ${formatARS(order.total)}`);
@@ -38,7 +37,7 @@ export function buildWhatsAppURL(order: Order): string {
   }
 
   lines.push("", `👤 Nombre: ${order.customerName}`, `📍 Barrio: ${order.customerNeighborhood}`);
-  if (order.customerMessage) lines.push(`💬 Detalles: ${order.customerMessage}`);
+  if (order.customerMessage) lines.push(`💬 Notas: ${order.customerMessage}`);
 
   return whatsappLink(lines.join("\n"));
 }

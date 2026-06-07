@@ -3,7 +3,7 @@ import { useState } from "react";
 import BookingCalendar from "@/components/calendar/BookingCalendar";
 import { useCalendarStore, useStockStore } from "@/lib/store";
 import { MONTH_NAMES_ES, formatDateES } from "@/lib/calendarUtils";
-import { getAllProducts } from "@/lib/data/products";
+import { getCatalogItems } from "@/lib/data/products";
 import { getSpecialDates } from "@/lib/data/specialDates";
 
 type Tab = "fechas" | "especiales" | "stock";
@@ -156,7 +156,7 @@ function EspecialesTab() {
 }
 
 function StockTab() {
-  const products = getAllProducts();
+  const items = getCatalogItems();
   const { isAvailable, setAvailable } = useStockStore();
 
   return (
@@ -165,39 +165,21 @@ function StockTab() {
         Disponibilidad de productos
       </h2>
       <p className="text-sm text-ink-muted font-body mb-6">
-        Activá o desactivá productos y variedades. Lo que desactives no se podrá
-        seleccionar en el formulario de encargo.
+        Activá o desactivá productos. Lo que desactives aparece como “Sin stock” y no se
+        puede agregar al carrito.
       </p>
 
       <div className="space-y-3">
-        {products.map((p) => (
-          <div key={p.id} className="bg-surface border border-black/5 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-body text-sm font-medium text-ink">{p.name}</p>
-                <p className="font-body text-xs text-ink-muted capitalize">
-                  {p.category.replace("-", " ")}
-                </p>
-              </div>
-              <Toggle
-                on={isAvailable(p.id)}
-                onChange={(v) => setAvailable(p.id, null, v)}
-              />
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="bg-surface border border-black/5 rounded-xl p-4 flex items-center justify-between"
+          >
+            <div>
+              <p className="font-body text-sm font-medium text-ink">{item.name}</p>
+              <p className="font-body text-xs text-ink-muted capitalize">{item.filter}</p>
             </div>
-
-            {p.kind === "stock" && p.varieties && (
-              <div className="mt-3 pt-3 border-t border-black/5 space-y-2">
-                {p.varieties.map((v) => (
-                  <div key={v.id} className="flex items-center justify-between pl-2">
-                    <span className="font-body text-xs text-ink-muted">{v.name}</span>
-                    <Toggle
-                      on={isAvailable(p.id, v.id)}
-                      onChange={(val) => setAvailable(p.id, v.id, val)}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <Toggle on={isAvailable(item.id)} onChange={(v) => setAvailable(item.id, v)} />
           </div>
         ))}
       </div>

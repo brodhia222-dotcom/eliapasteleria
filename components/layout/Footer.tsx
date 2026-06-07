@@ -13,7 +13,7 @@ export default function Footer() {
               {SITE.brand}
             </p>
             <p className="text-sm text-cream/50 max-w-xs">
-              Cookies y brownies siempre disponibles, tortas y mesa dulce artesanal
+              Cookies y brownies siempre disponibles, y tortas artesanales por encargo,
               elaboradas con amor en Buenos Aires.
             </p>
           </div>
@@ -21,10 +21,10 @@ export default function Footer() {
           <nav className="flex flex-col gap-2 text-sm">
             <p className="text-cream/40 text-xs uppercase tracking-widest mb-1">Menú</p>
             <Link href="/productos" className="hover:text-cream transition-colors">Productos</Link>
-            <Link href="/tortas" className="hover:text-cream transition-colors">Tortas</Link>
-            <Link href="/mesa-dulce" className="hover:text-cream transition-colors">Mesa dulce</Link>
             <Link href="/galeria" className="hover:text-cream transition-colors">Galería</Link>
-            <Link href="/encargo" className="hover:text-cream transition-colors">Hacer encargo</Link>
+            <Link href="/nosotras" className="hover:text-cream transition-colors">Sobre mí</Link>
+            <Link href="/preguntas" className="hover:text-cream transition-colors">Preguntas</Link>
+            <Link href="/encargo" className="hover:text-cream transition-colors">Hacer pedido</Link>
           </nav>
 
           <div className="flex flex-col gap-2 text-sm">

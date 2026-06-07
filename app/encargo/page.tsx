@@ -35,10 +35,10 @@ export default function EncargoPage() {
           <>
             <div className="mb-8">
               <p className="text-teal text-xs uppercase tracking-widest font-body mb-2">
-                Hacé tu encargo
+                Finalizá tu pedido
               </p>
               <h1 className="font-display text-4xl font-semibold text-ink">
-                Elia Pasteleria
+                Elia Pastelería
               </h1>
             </div>
             <StepIndicator current={step} />

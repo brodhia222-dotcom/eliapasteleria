@@ -38,10 +38,10 @@ export default function SpecialDateBanner() {
         </div>
 
         <Link
-          href={next.ctaProductSlug ? `/encargo?producto=${next.ctaProductSlug}` : "/encargo"}
+          href="/productos"
           className="inline-flex items-center justify-center gap-2 bg-teal text-white font-medium px-7 py-3.5 rounded-full hover:bg-teal-d transition-all duration-300 active:scale-95 text-sm shrink-0"
         >
-          Reservar para esta fecha →
+          Ver productos →
         </Link>
       </motion.div>
     </section>

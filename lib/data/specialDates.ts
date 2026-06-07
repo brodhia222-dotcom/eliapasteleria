@@ -15,7 +15,6 @@ export interface SpecialDate {
   includes: string;
   badge: string;
   color: string;
-  ctaProductSlug?: string;
 }
 
 /** Próxima ocurrencia (este año o el siguiente) de una def mes/día. */
@@ -37,7 +36,6 @@ export function getSpecialDates(from: Date = new Date()): SpecialDate[] {
     includes: def.includes,
     badge: def.badge,
     color: def.color,
-    ctaProductSlug: def.ctaProductSlug,
   })).sort((a, b) => a.date.localeCompare(b.date));
 }
 

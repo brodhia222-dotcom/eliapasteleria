@@ -1,7 +1,7 @@
 // ============================================================================
 // Cálculo de precios y seña
 // ============================================================================
-import type { CustomCakeProduct, Product, LeadTime } from "./mockData";
+import type { CatalogItem, CustomCakeItem } from "./mockData";
 
 export const DEPOSIT_RATE = 0.5;
 
@@ -12,51 +12,33 @@ export function calcDeposit(total: number): number {
 
 /** Precio de una torta personalizada = tamaño + relleno + decoración. */
 export function calcCustomCakePrice(
-  product: CustomCakeProduct,
-  sel: {
-    tierKey?: string | null;
-    fillingId?: string | null;
-    decorationId?: string | null;
-  }
+  item: CustomCakeItem,
+  sel: { tierKey?: string | null; fillingId?: string | null; decorationId?: string | null }
 ): number {
-  const tier = product.tiers.find((t) => t.key === sel.tierKey);
-  const filling = product.fillingOptions.find((f) => f.id === sel.fillingId);
-  const deco = product.decorationOptions.find((d) => d.id === sel.decorationId);
-  return (
-    (tier?.basePrice ?? 0) +
-    (filling?.priceDelta ?? 0) +
-    (deco?.priceDelta ?? 0)
-  );
+  const tier = item.tiers.find((t) => t.key === sel.tierKey);
+  const filling = item.fillingOptions.find((f) => f.id === sel.fillingId);
+  const deco = item.decorationOptions.find((d) => d.id === sel.decorationId);
+  return (tier?.basePrice ?? 0) + (filling?.priceDelta ?? 0) + (deco?.priceDelta ?? 0);
 }
 
-/** Horas de anticipación que exige un producto (0 si está siempre en stock). */
-export function leadHoursOf(leadTime: LeadTime): number {
-  return leadTime.type === "stock" ? 0 : leadTime.hours;
-}
-
-/** Etiqueta legible de la demora de un producto. */
-export function leadTimeLabel(product: Product): string {
-  if (product.leadTime.type === "stock") return "Siempre disponible · 24/7";
-  const h = product.leadTime.hours;
-  if (h <= 48) return "Listo en 48 hs";
-  const days = Math.round(h / 24);
-  return `Listo en ${days} días`;
-}
-
-/** Precio "desde" de un producto (el mínimo entre sus variantes). */
-export function priceFrom(product: Product): number {
-  switch (product.kind) {
-    case "stock": {
-      const vs = product.varieties?.map((v) => v.pricePerDozen) ?? [];
-      return vs.length ? Math.min(...vs) : product.unitPrice;
-    }
-    case "standard":
-      return Math.min(...product.sizes.map((s) => s.price));
+/** Precio "desde" de un ítem del catálogo (el mínimo entre sus variantes). */
+export function priceFrom(item: CatalogItem): number {
+  switch (item.type) {
+    case "unit":
+      return item.unitPrice;
+    case "cake":
+      return item.slicePrice; // la porción es lo más barato
     case "custom":
-      return Math.min(...product.tiers.map((t) => t.basePrice));
-    case "addon":
-      return product.unitPrice;
+      return Math.min(...item.tiers.map((t) => t.basePrice));
   }
+}
+
+/** Etiqueta legible de la anticipación requerida. */
+export function leadTimeLabel(leadHours: number): string {
+  if (leadHours <= 0) return "Siempre disponible · 24/7";
+  if (leadHours <= 48) return "Listo en 48 hs";
+  const days = Math.round(leadHours / 24);
+  return `Listo en ${days} días`;
 }
 
 /** Formato de moneda argentina. */

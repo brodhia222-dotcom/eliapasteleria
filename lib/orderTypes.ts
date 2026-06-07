@@ -1,38 +1,27 @@
 // ============================================================================
-// Tipos de dominio del PEDIDO (forma final que mapea a la tabla `orders`)
+// Tipos de dominio del PEDIDO (forma final → tabla `orders` en Fase 2)
 // ============================================================================
-import type { ProductKind } from "./mockData";
-
 export type DeliveryMethod = "pickup" | "shipping";
 
 export type DepositStatus = "pending" | "paid";
 
 export type OrderStatus =
-  | "draft" // armándose en el cliente
-  | "pending_deposit" // enviado, esperando seña (tortas)
-  | "confirmed" // seña abonada / producto de stock sin seña
+  | "draft"
+  | "pending_deposit" // tortas: esperando seña
+  | "confirmed" // stock sin seña / seña abonada
   | "in_production"
   | "ready"
   | "delivered"
   | "cancelled";
 
 export interface OrderItem {
-  productId: string;
-  productName: string;
-  kind: ProductKind;
-  // selección según kind:
-  sizeKey?: string; // standard
-  tierKey?: string; // custom
-  fillingId?: string; // custom
-  fillingName?: string;
-  decorationId?: string; // custom
-  decorationName?: string;
-  varietyId?: string; // cookies (stock)
-  varietyName?: string;
-  detail?: string; // texto legible del tamaño/porciones
+  itemId: string;
+  name: string;
+  detail: string;
   qty: number;
   unitPrice: number;
   lineTotal: number;
+  requiresDeposit: boolean;
 }
 
 export interface Order {
@@ -48,9 +37,9 @@ export interface Order {
   customerMessage: string;
   total: number;
   requiresDeposit: boolean;
-  depositAmount: number; // 50% si requiresDeposit
+  depositAmount: number;
   depositStatus: DepositStatus;
   status: OrderStatus;
-  leadTimeHoursApplied: number; // 0 | 48 | 120
+  leadTimeHoursApplied: number;
   createdAt?: string;
 }

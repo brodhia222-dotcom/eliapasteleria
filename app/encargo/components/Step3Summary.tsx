@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useOrderStore, useCalendarStore } from "@/lib/store";
+import { useCartStore } from "@/lib/cartStore";
 import { formatDateES } from "@/lib/calendarUtils";
 import { formatARS } from "@/lib/pricing";
-import { buildOrder, type OrderSelection, type OrderCustomer } from "@/lib/orderUtils";
+import { buildOrder, type OrderCustomer } from "@/lib/orderUtils";
 import { buildWhatsAppURL } from "@/lib/whatsappUtils";
 import { createOrder } from "@/lib/data/orders";
 
@@ -15,18 +16,9 @@ interface Props {
 export default function Step3Summary({ onConfirm, onBack }: Props) {
   const store = useOrderStore();
   const { selectedDate, blockDate } = useCalendarStore();
+  const { lines } = useCartStore();
   const [submitting, setSubmitting] = useState(false);
 
-  const selection: OrderSelection = {
-    selectedProductId: store.selectedProductId,
-    selectedSizeKey: store.selectedSizeKey,
-    selectedTierKey: store.selectedTierKey,
-    selectedFillingId: store.selectedFillingId,
-    selectedDecorationId: store.selectedDecorationId,
-    selectedVarietyId: store.selectedVarietyId,
-    qty: store.qty,
-    selectedAddons: store.selectedAddons,
-  };
   const customer: OrderCustomer = {
     deliveryDate: selectedDate,
     deliveryMethod: store.deliveryMethod,
@@ -38,7 +30,7 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
     customerMessage: store.customerMessage,
   };
 
-  const order = buildOrder(selection, customer);
+  const order = buildOrder(lines, customer);
   const isShipping = order.deliveryMethod === "shipping";
   const waURL = selectedDate ? buildWhatsAppURL(order) : "#";
 
@@ -57,14 +49,9 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
 
   return (
     <div className="max-w-lg">
-      <h2 className="font-display text-2xl font-semibold text-ink mb-2">
-        Resumen del pedido
-      </h2>
-      <p className="text-sm text-ink-muted font-body mb-8">
-        Revisá los detalles antes de confirmar.
-      </p>
+      <h2 className="font-display text-2xl font-semibold text-ink mb-2">Resumen del pedido</h2>
+      <p className="text-sm text-ink-muted font-body mb-8">Revisá los detalles antes de confirmar.</p>
 
-      {/* Summary card */}
       <div className="bg-surface border border-black/5 rounded-2xl p-6 mb-6 space-y-4">
         <Row label="Fecha de entrega" value={selectedDate ? formatDateES(selectedDate) : "—"} highlight />
 
@@ -72,14 +59,10 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
           {order.items.map((item, i) => (
             <div key={i} className="flex justify-between gap-4">
               <div>
-                <p className="font-body text-sm font-medium text-ink">{item.productName}</p>
+                <p className="font-body text-sm font-medium text-ink">
+                  {item.qty > 1 ? `${item.qty}× ` : ""}{item.name}
+                </p>
                 <p className="font-body text-xs text-ink-muted">{item.detail}</p>
-                {item.fillingName && (
-                  <p className="font-body text-xs text-ink-muted">Relleno: {item.fillingName}</p>
-                )}
-                {item.decorationName && (
-                  <p className="font-body text-xs text-ink-muted">Decoración: {item.decorationName}</p>
-                )}
               </div>
               <p className="font-body text-sm text-ink shrink-0">{formatARS(item.lineTotal)}</p>
             </div>
@@ -92,10 +75,8 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
         </div>
         {order.requiresDeposit && (
           <div className="flex justify-between items-center">
-            <p className="font-body text-sm text-amber-700">Seña (50%) para confirmar</p>
-            <p className="font-display text-lg font-semibold text-amber-700">
-              {formatARS(order.depositAmount)}
-            </p>
+            <p className="font-body text-sm text-amber-700">Seña (50%) de las tortas</p>
+            <p className="font-display text-lg font-semibold text-amber-700">{formatARS(order.depositAmount)}</p>
           </div>
         )}
 
@@ -108,25 +89,23 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
         </div>
       </div>
 
-      {/* Aviso de seña / estado */}
       {order.requiresDeposit ? (
         <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-4 mb-6">
           <p className="text-xs text-amber-800 font-body leading-relaxed">
             <strong>Seña del 50% ({formatARS(order.depositAmount)})</strong> para confirmar la
-            reserva. <strong>El pedido no queda confirmado hasta que la seña esté abonada.</strong>{" "}
-            El saldo se paga antes de la entrega. Coordinamos el pago por WhatsApp.
+            reserva de las tortas. <strong>El pedido no queda confirmado hasta que la seña esté
+            abonada.</strong> El saldo se paga antes de la entrega. Coordinamos el pago por WhatsApp.
           </p>
         </div>
       ) : (
         <div className="bg-sage/10 border border-sage/30 rounded-xl p-4 mb-6">
           <p className="text-xs text-ink-muted font-body leading-relaxed">
-            Cookies y brownies están siempre disponibles. Confirmá tu pedido y coordinamos
-            la entrega por WhatsApp.
+            Cookies y brownies están siempre disponibles. Confirmá tu pedido y coordinamos la
+            entrega por WhatsApp.
           </p>
         </div>
       )}
 
-      {/* Actions */}
       <div className="space-y-3">
         <a
           href={waURL}
@@ -156,7 +135,7 @@ export default function Step3Summary({ onConfirm, onBack }: Props) {
           onClick={onBack}
           className="w-full text-center text-sm text-ink-muted font-body hover:text-ink transition-colors pt-1"
         >
-          ← Volver a mis datos
+          ← Volver
         </button>
       </div>
     </div>

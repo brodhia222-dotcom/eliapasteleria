@@ -1,12 +1,12 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCartStore, cartCount } from "@/lib/cartStore";
 
 const NAV_LINKS = [
   { label: "Productos", href: "/productos" },
-  { label: "Tortas", href: "/tortas" },
   { label: "Galería", href: "/galeria" },
   { label: "Sobre mí", href: "/nosotras" },
   { label: "Preguntas", href: "/preguntas" },
@@ -15,10 +15,16 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  const { lines, open } = useCartStore();
+  const count = cartCount(lines);
 
   // Solo transparente sobre el hero de la home; en el resto siempre sólido
   const isTransparent = pathname === "/" && !scrolled;
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -35,6 +41,8 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
+  const iconColor = isTransparent ? "text-white" : "text-ink";
+
   return (
     <>
       <header
@@ -49,9 +57,7 @@ export default function Navbar() {
           <Link
             href="/"
             className={`font-display text-xl font-semibold tracking-tight transition-colors duration-500 ${
-              isTransparent
-                ? "text-white hover:text-white/80"
-                : "text-ink hover:text-teal"
+              isTransparent ? "text-white hover:text-white/80" : "text-ink hover:text-teal"
             }`}
           >
             Elia Pastelería
@@ -82,8 +88,27 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* CTA + Hamburger */}
-          <div className="flex items-center gap-4">
+          {/* Carrito + CTA + Hamburger */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={open}
+              className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
+                isTransparent ? "hover:bg-white/15" : "hover:bg-cream-deep"
+              }`}
+              aria-label="Abrir carrito"
+            >
+              <svg className={`w-5 h-5 ${iconColor}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+              {mounted && count > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-teal text-white text-[10px] font-bold flex items-center justify-center">
+                  {count}
+                </span>
+              )}
+            </button>
+
             <Link
               href="/encargo"
               className={`hidden md:inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-full transition-all duration-300 active:scale-95 ${
@@ -92,8 +117,8 @@ export default function Navbar() {
                   : "bg-teal text-white hover:bg-teal-d"
               }`}
             >
-              Hacer encargo
-              <span className={isTransparent ? "text-white/70" : "text-white/70"}>→</span>
+              Hacer pedido
+              <span className="text-white/70">→</span>
             </Link>
 
             <button
@@ -165,7 +190,7 @@ export default function Navbar() {
                   href="/encargo"
                   className="inline-flex items-center gap-2 bg-teal text-white font-medium px-7 py-3.5 rounded-full text-lg"
                 >
-                  Hacer encargo →
+                  Hacer pedido →
                 </Link>
               </motion.div>
             </nav>

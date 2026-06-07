@@ -1,4 +1,4 @@
-﻿const STEPS = ["Tu encargo", "Tus datos", "Confirmar"];
+﻿const STEPS = ["Fecha", "Tus datos", "Confirmar"];
 
 export default function StepIndicator({ current }: { current: number }) {
   return (
